@@ -1,2 +1,5 @@
 #define SYMBOL_SIZE 256 // 2^8
 #define ASCII_SIZE 8
+
+#define FORMAT_CODE_LENGTH 3
+#define FORMAT_CODE "ZXC"

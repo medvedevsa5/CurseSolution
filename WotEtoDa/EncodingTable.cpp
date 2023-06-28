@@ -12,8 +12,9 @@
 #include "FmtGuard.h"
 #include "EncodingTable.h"
 #include "Constants.h"
+#include "Exceptions.h"
 
-void EncodingTable::encode(std::vector<char>& orig, std::vector<char>& dest, StreamScanner& scanner)
+void EncodingTable::encode(const std::vector<char>& orig, std::vector<char>& dest, const & scanner) const
 {
 	std::vector<char> tmpVector;
 	double compressionRatio = calculateCompressionRatio(scanner);
@@ -23,6 +24,12 @@ void EncodingTable::encode(std::vector<char>& orig, std::vector<char>& dest, Str
 
 	for(auto& ch : orig)
 	{
+		auto tableIt = codeTable_.find(ch);
+		if (tableIt == codeTable_.end())
+		{
+			throw BadTableException();
+		}
+
 		std::vector<bool>& code = codeTable_.at(ch);
 		
 		for (const auto& bit : code)
@@ -71,7 +78,7 @@ size_t EncodingTable::getMapSize() const
 
 // тнплюр:
 // (char) яхлбнк | (short) дкхмю йндю | (short) йнд
-void EncodingTable::serializeMap(std::vector<char>& out)
+void EncodingTable::serializeMap(std::vector<char>& out) const
 {
 	std::vector<char> serializedMap;
 	serializedMap.reserve(sizeof(codeTable_));
@@ -103,7 +110,7 @@ void EncodingTable::serializeMap(std::vector<char>& out)
 	out.swap(serializedMap);
 }
 
-double EncodingTable::calculateExpectancy(StreamScanner& scanner) const
+double EncodingTable::calculateExpectancy(const StreamScanner& scanner) const
 {
 	double result = 0;
 	for (auto& var : codeTable_)
@@ -114,7 +121,7 @@ double EncodingTable::calculateExpectancy(StreamScanner& scanner) const
 	return result;
 }
 
-double EncodingTable::calculateCompressionRatio(StreamScanner& scanner) const
+double EncodingTable::calculateCompressionRatio(const StreamScanner& scanner) const
 {
 	double expectedValue = calculateExpectancy(scanner);
 	return (ASCII_SIZE - expectedValue) / ASCII_SIZE;

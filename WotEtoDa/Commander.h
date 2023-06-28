@@ -11,9 +11,9 @@ public:
 	void setCommand(Commands cmd);
 	void setFileName(const std::string& fileName);
 
-	void invoke();
+	std::string invoke() const;
 
-private: // CHANGE!!!
-	std::function<void()> command_;
+private:
+	std::function < std::string() > command_;
 	std::string fileName_;
 };

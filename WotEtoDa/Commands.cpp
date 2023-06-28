@@ -1,4 +1,11 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
+
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 
 #include "Commands.h"
 #include "Exceptions.h"
@@ -7,10 +14,7 @@
 #include "EncodingTable.h"
 #include "DecodingTable.h"
 
-#include <iostream> // DELETE
-
-// 
-void Encode::operator()(const std::string& fileName)
+std::string Encode::operator()(const std::string& fileName)
 {
     std::ifstream fileToEncode(fileName, std::ios::binary);
     if (!fileToEncode)
@@ -31,14 +35,18 @@ void Encode::operator()(const std::string& fileName)
     std::vector<char> code;
     table.encode(fileChars, code, scanner);
 
-    std::ofstream outputFile(fileName + ".out", std::ios::binary);
+    std::string outputFileName = fileName + ".out";
+    std::ofstream outputFile(outputFileName, std::ios::binary);
     if (!outputFile)
     {
-        //throw FileCreationException(fileName + ".out");
+        throw FileCreationException(fileName + ".out");
     }
 
     std::vector<char> serializedMap;
     table.serializeMap(serializedMap);
+
+    char format[FORMAT_CODE_LENGTH + 1] = FORMAT_CODE;
+    outputFile.write(reinterpret_cast<const char*>(&format), sizeof(format));
 
     // Размер файла до сжатия
     size_t fileSize = scanner.getFileSize();
@@ -62,10 +70,15 @@ void Encode::operator()(const std::string& fileName)
     // Код Хаффмана
     outputFile.write(code.data(), code.size()*sizeof(char));
 
-    outputFile.close();
+    if (!outputFile)
+    {
+        throw FileWritingException(outputFileName);
+    }
+
+    return "File has been encoded succesfuly";
 }
 
-void Decode::operator()(const std::string& fileName)
+std::string Decode::operator()(const std::string& fileName)
 {
 	std::ifstream fileToDecode(fileName, std::ios::binary);
 	if (!fileToDecode.is_open())
@@ -73,12 +86,20 @@ void Decode::operator()(const std::string& fileName)
 		throw FileNotFoundException(fileName);
 	}
 
+    char format[FORMAT_CODE_LENGTH + 1]{};
+    fileToDecode.read(reinterpret_cast<char*>(&format), sizeof(format));
+
+    if (strcmp(format, FORMAT_CODE) != 0)
+    {
+        throw InvalidFormatException();
+    }
+
     size_t fileSize = 0;
     fileToDecode.read(reinterpret_cast<char*>(&fileSize), sizeof(fileSize));
 
 	size_t tableKeyCount = 0;
 	fileToDecode.read(reinterpret_cast<char*>(&tableKeyCount), sizeof(tableKeyCount));
-	
+
 	size_t dataSize = 0;
 	fileToDecode.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
 
@@ -91,12 +112,19 @@ void Decode::operator()(const std::string& fileName)
     std::vector<char> code(codeSize);
     fileToDecode.read(code.data(), codeSize);
 
+    if (!fileToDecode)
+    {
+        throw FileWritingException(fileName);
+    }
+
     fileToDecode.close();
 
-    std::ofstream outputFile(fileName + ".out", std::ios::binary);
+    std::string outputFileName = fileName + ".out";
+
+    std::ofstream outputFile(outputFileName, std::ios::binary);
     if (!outputFile)
     {
-        //throw FileCreationException(fileName + ".out");
+        throw FileCreationException(outputFileName);
     }
 
     std::vector<char> result;
@@ -104,9 +132,38 @@ void Decode::operator()(const std::string& fileName)
 
     outputFile.write(result.data(), result.size() * sizeof(char));
 
-    outputFile.close();
+    if (!fileToDecode)
+    {
+        throw FileWritingException(outputFileName);
+    }
+
+    return "File has been decoded successfuly";
 }
 
-void Analyze::operator()(const std::string& fileName)
+std::string Analyze::operator()(const std::string& fileName)
 {
+    StreamScanner scanner;
+    std::ifstream fstream(fileName, std::ios::binary);
+    if (!fstream)
+    {
+        throw FileNotFoundException(fileName);
+    }
+
+    scanner.scan(fstream);
+    
+    HuffmanTree ht(scanner);
+
+    EncodingTable table;
+
+    ht.fillEncodingTable(table);
+
+    double ratio = table.calculateCompressionRatio(scanner);
+
+    std::string message = "Theoretical compression ratio is ";
+
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << ratio * 100;
+    message += ss.str();
+
+    return message;
 }

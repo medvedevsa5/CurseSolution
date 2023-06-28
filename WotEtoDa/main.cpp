@@ -7,19 +7,28 @@
 #include <chrono>
 #include <algorithm>
 #include <iterator>
+#include <iomanip>
 
 #include "FmtGuard.h"
 #include "EncodingTable.h"
 #include "HuffmanTree.h"
 #include "Commander.h"
 #include "Commands.h"
+#include "Exceptions.h"
 
 void handleCommands(std::istream& in, std::ostream& out);
 
 int main()
 {
-    handleCommands(std::cin, std::cout);
-
+    try
+    {
+        handleCommands(std::cin, std::cout);
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what();
+        return -1;
+    }
     return 0;
 }
 
@@ -27,16 +36,18 @@ int main()
 
 void handleCommands(std::istream& in, std::ostream& out)
 {
+    FmtGuard fmtGuard(out);
+    out << std::fixed << std::setprecision(2);
     Commander cmd;
     std::string command;
 
     while (in >> command)
     {
-        if (command == "COMPRESS")
+        if (command == "ENCODE")
         {
             cmd.setCommand(Commands::EncodeNum);
         }
-        else if (command == "DECOMPRESS")
+        else if (command == "DECODE")
         {
             cmd.setCommand(Commands::DecodeNum);
         }
@@ -46,26 +57,31 @@ void handleCommands(std::istream& in, std::ostream& out)
         }
         else
         {
-            std::cerr << "Unknown command.";
+            std::cerr << "Unknown command." << std::endl;
         }
+
         std::string fileName;
         in >> fileName;
         if (!in)
         {
-            //throw 
+            throw ReadingCommandStreamException();
         }
 
         cmd.setFileName(fileName);
 
         try
         {
-            cmd.invoke();
+            std::string output = cmd.invoke();
+            out << output << std::endl;
         }
         catch (std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            std::cerr << e.what() << std::endl;
         }
-
-        out << "DONE" << std::endl;
+        
+    }
+    if (!in && !in.eof())
+    {
+        throw ReadingCommandStreamException();
     }
 }

@@ -14,19 +14,19 @@ enum Commands
 class Encode
 {
 public:
-	void operator()(const std::string& fileName);
+	std::string operator()(const std::string& fileName);
 };
 
 class Decode
 {
 public:
-	void operator()(const std::string& fileName);
+	std::string operator()(const std::string& fileName);
 };
 
 class Analyze
 {
 public:
-	void operator()(const std::string& fileName);
+	std::string operator()(const std::string& fileName);
 };
 
 #endif

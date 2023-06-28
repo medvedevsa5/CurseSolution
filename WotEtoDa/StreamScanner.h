@@ -11,6 +11,7 @@ class StreamScanner
 {
 public:
 	void scan(std::istream& in, std::vector<char>& vec);
+	void scan(std::istream& in);
 
 	int getProbability(char ch) const;
 	void addProbability(char ch);

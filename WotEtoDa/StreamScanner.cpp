@@ -34,6 +34,25 @@ void StreamScanner::scan(std::istream& in, std::vector<char>& vec)
 	vec.swap(tmpVector);
 }
 
+void StreamScanner::scan(std::istream& in)
+{
+	FmtGuard fmtGuard(in);
+	in >> std::noskipws;
+
+	in.seekg(0, std::ios::end);
+	std::streampos fileSize = in.tellg();
+	in.seekg(0, std::ios::beg);
+
+	char ch = '\0';
+
+	while (in >> ch)
+	{
+		addProbability(ch);
+	}
+
+	fileSize_ = fileSize;
+}
+
 int StreamScanner::getProbability(char ch) const
 {
 	int frequency = 0;

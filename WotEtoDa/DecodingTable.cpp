@@ -1,7 +1,14 @@
-#include "DecodingTable.h"
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
+
 #include <sstream>
 #include <iostream>
 #include <fstream>
+
+#include "DecodingTable.h"
+#include "Exceptions.h"
 
 void DecodingTable::deserialize(std::ifstream& data, size_t keyCount)
 {
@@ -17,6 +24,11 @@ void DecodingTable::deserialize(std::ifstream& data, size_t keyCount)
 
         short codeRaw = 0;
         data.read(reinterpret_cast<char*>(&codeRaw), sizeof(codeRaw));
+
+        if (!data)
+        {
+            throw FileWritingException("Deserialized table.");
+        }
 
         std::vector<bool> code;
         code.reserve(codeSize);
@@ -41,18 +53,15 @@ void DecodingTable::decode(const std::vector<char>& code, std::vector<char>& res
 	std::vector<bool> translatedChar;
 	translatedChar.reserve(8);
 
+	size_t byteCount = 0;
+
 	int num = code.size() * 8;
 
 	for (size_t i = 0; i < num - 6; i++)
 	{
-		if ((code[i / 8] >> (i % 8)) & 1)
-		{
-			translatedChar.push_back(1);
-		}
-		else
-		{
-			translatedChar.push_back(0);
-		}
+        bool bit = (code[i / 8] >> (i % 8)) & 1;
+        translatedChar.push_back(bit);
+
 		auto codeIter = codeTable_.find(translatedChar);
 		if (codeIter != codeTable_.cend())
 		{

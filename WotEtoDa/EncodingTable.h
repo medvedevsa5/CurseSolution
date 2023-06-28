@@ -16,7 +16,7 @@ public:
 	// https://habr.com/ru/companies/vk/articles/666330/
 	// https://pvs-studio.com/en/blog/terms/6516/
 	// https://en.cppreference.com/w/cpp/language/copy_elision NOTES
-	void encode(std::vector<char>& orig, std::vector<char>& dest, StreamScanner& scanner);
+	void encode(const std::vector<char>& orig, std::vector<char>& dest, const StreamScanner& scanner);
 
 	void insertCode(char ch, std::vector<bool>& code);
 	void getCode(char ch, std::vector<bool>& code) const;
@@ -24,13 +24,13 @@ public:
 	double getExpectancy(StreamScanner& scanner) const;
 	size_t getMapSize() const;
 
-	void serializeMap(std::vector<char>& out);
+	void serializeMap(std::vector<char>& out) const;
 public:
 	std::unordered_map<char, std::vector<bool>> codeTable_;
 
 	// https://en.wikipedia.org/wiki/Expected_value
-	double calculateExpectancy(StreamScanner& scanner) const;
-	double calculateCompressionRatio(StreamScanner& scanner) const;
+	double calculateExpectancy(const StreamScanner& scanner) const;
+	double calculateCompressionRatio(const StreamScanner& scanner) const;
 };
 
 #endif // _HUFFMAN_TABLE_
