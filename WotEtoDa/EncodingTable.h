@@ -16,7 +16,7 @@ public:
 	// https://habr.com/ru/companies/vk/articles/666330/
 	// https://pvs-studio.com/en/blog/terms/6516/
 	// https://en.cppreference.com/w/cpp/language/copy_elision NOTES
-	void encode(const std::vector<char>& orig, std::vector<char>& dest, const StreamScanner& scanner);
+	void encode(const std::vector<char>& orig, std::vector<char>& dest, const StreamScanner& scanner) const;
 
 	void insertCode(char ch, std::vector<bool>& code);
 	void getCode(char ch, std::vector<bool>& code) const;

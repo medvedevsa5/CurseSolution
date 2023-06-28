@@ -14,7 +14,7 @@
 #include "Constants.h"
 #include "Exceptions.h"
 
-void EncodingTable::encode(const std::vector<char>& orig, std::vector<char>& dest, const & scanner) const
+void EncodingTable::encode(const std::vector<char>& orig, std::vector<char>& dest, const StreamScanner& scanner) const
 {
 	std::vector<char> tmpVector;
 	double compressionRatio = calculateCompressionRatio(scanner);
@@ -30,7 +30,7 @@ void EncodingTable::encode(const std::vector<char>& orig, std::vector<char>& des
 			throw BadTableException();
 		}
 
-		std::vector<bool>& code = codeTable_.at(ch);
+		std::vector<bool> code = codeTable_.at(ch);
 		
 		for (const auto& bit : code)
 		{
