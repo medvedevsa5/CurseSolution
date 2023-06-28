@@ -1,8 +1,3 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
-
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -52,6 +47,15 @@ std::string Encode::operator()(const std::string& fileName)
     size_t fileSize = scanner.getFileSize();
     outputFile.write(reinterpret_cast<const char*>(&fileSize), sizeof(fileSize));
 
+    std::vector<char> fileNameRaw(fileName.begin(), fileName.end());
+
+    // Длина названия файла
+    size_t fileNameSize = fileName.size();
+    outputFile.write(reinterpret_cast<const char*>(&fileNameSize), sizeof(fileNameSize));
+
+    // Название файла
+    outputFile.write(fileName.data(), fileNameRaw.size() * sizeof(char));
+
     // Количество пар ключ-значение
     size_t mapKeyCount = table.getMapSize();
     outputFile.write(reinterpret_cast<const char*>(&mapKeyCount), sizeof(mapKeyCount));
@@ -97,6 +101,13 @@ std::string Decode::operator()(const std::string& fileName)
     size_t fileSize = 0;
     fileToDecode.read(reinterpret_cast<char*>(&fileSize), sizeof(fileSize));
 
+    size_t fileNameSize = 0;
+    fileToDecode.read(reinterpret_cast<char*>(&fileNameSize), sizeof(fileNameSize));
+
+    std::vector<char> fileNameRaw(fileNameSize);
+    fileToDecode.read(fileNameRaw.data(), fileNameSize);
+    std::string outputFileName(fileNameRaw.begin(), fileNameRaw.end());
+
 	size_t tableKeyCount = 0;
 	fileToDecode.read(reinterpret_cast<char*>(&tableKeyCount), sizeof(tableKeyCount));
 
@@ -118,8 +129,6 @@ std::string Decode::operator()(const std::string& fileName)
     }
 
     fileToDecode.close();
-
-    std::string outputFileName = fileName + ".out";
 
     std::ofstream outputFile(outputFileName, std::ios::binary);
     if (!outputFile)

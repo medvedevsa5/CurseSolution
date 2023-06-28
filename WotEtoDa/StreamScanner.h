@@ -21,8 +21,6 @@ public:
 	size_t getFileSize() const;
 
 private:
-
-
 	std::unordered_map<char, int> probability_;
 	size_t charCount_ = 0;
 	size_t fileSize_ = 0;

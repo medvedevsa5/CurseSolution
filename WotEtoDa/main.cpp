@@ -1,8 +1,4 @@
-﻿// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
-#include <iostream>
+﻿#include <iostream>
 #include <fstream>
 #include <chrono>
 #include <algorithm>
@@ -24,7 +20,7 @@ int main()
     {
         handleCommands(std::cin, std::cout);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         std::cerr << e.what();
         return -1;
@@ -32,12 +28,9 @@ int main()
     return 0;
 }
 
-// НЕ ЗАБУДЬ КОНСТ
-
 void handleCommands(std::istream& in, std::ostream& out)
 {
     FmtGuard fmtGuard(out);
-    out << std::fixed << std::setprecision(2);
     Commander cmd;
     std::string command;
 
@@ -74,7 +67,7 @@ void handleCommands(std::istream& in, std::ostream& out)
             std::string output = cmd.invoke();
             out << output << std::endl;
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             std::cerr << e.what() << std::endl;
         }
